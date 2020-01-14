@@ -35,7 +35,7 @@ namespace ArduinoIDE_Launcher
             System.Windows.Forms.ListViewGroup listViewGroup7 = new System.Windows.Forms.ListViewGroup("Recent", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup8 = new System.Windows.Forms.ListViewGroup("Sketch Folder", System.Windows.Forms.HorizontalAlignment.Left);
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.listView2 = new System.Windows.Forms.ListView();
+            this.ListViewPreferences = new System.Windows.Forms.ListView();
             this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
             this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
             this.columnHeader6 = new System.Windows.Forms.ColumnHeader();
@@ -51,6 +51,8 @@ namespace ArduinoIDE_Launcher
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.ButtonSaveCustom = new System.Windows.Forms.Button();
             // 
             // textBox1
             // 
@@ -60,31 +62,37 @@ namespace ArduinoIDE_Launcher
             this.textBox1.Size = new System.Drawing.Size(405, 23);
             this.textBox1.TabIndex = 1;
             // 
-            // listView2
+            // ListViewPreferences
             // 
-            this.listView2.CheckBoxes = true;
-            this.listView2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.ListViewPreferences.Activation = System.Windows.Forms.ItemActivation.OneClick;
+            this.ListViewPreferences.CheckBoxes = true;
+            this.ListViewPreferences.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader6});
-            this.listView2.FullRowSelect = true;
-            this.listView2.GridLines = true;
+            this.ListViewPreferences.FullRowSelect = true;
+            this.ListViewPreferences.GridLines = true;
             listViewGroup5.Header = "PROJECT";
             listViewGroup5.Name = "PROJECT";
             listViewGroup6.Header = "CUSTOM";
             listViewGroup6.HeaderAlignment = System.Windows.Forms.HorizontalAlignment.Right;
             listViewGroup6.Name = "CUSTOM";
-            this.listView2.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
+            this.ListViewPreferences.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
             listViewGroup5,
             listViewGroup6});
-            this.listView2.HideSelection = false;
-            this.listView2.Location = new System.Drawing.Point(485, 103);
-            this.listView2.MultiSelect = false;
-            this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(528, 495);
-            this.listView2.TabIndex = 3;
-            this.listView2.UseCompatibleStateImageBehavior = false;
-            this.listView2.View = System.Windows.Forms.View.Details;
+            this.ListViewPreferences.HideSelection = false;
+            this.ListViewPreferences.LabelWrap = false;
+            this.ListViewPreferences.Location = new System.Drawing.Point(485, 103);
+            this.ListViewPreferences.MultiSelect = false;
+            this.ListViewPreferences.Name = "ListViewPreferences";
+            this.ListViewPreferences.Size = new System.Drawing.Size(528, 461);
+            this.ListViewPreferences.TabIndex = 3;
+            this.ListViewPreferences.UseCompatibleStateImageBehavior = false;
+            this.ListViewPreferences.View = System.Windows.Forms.View.Details;
+            this.ListViewPreferences.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.ListViewPreferences_ItemCheck);
+            this.ListViewPreferences.SelectedIndexChanged += new System.EventHandler(this.ListViewPreferences_SelectedIndexChanged);
+            this.ListViewPreferences.DoubleClick += new System.EventHandler(this.ListViewPreferences_DoubleClick);
+            this.ListViewPreferences.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ListViewPreferences_MouseDown);
             // 
             // columnHeader1
             // 
@@ -156,9 +164,9 @@ namespace ArduinoIDE_Launcher
             // 
             // ButtonSavePref
             // 
-            this.ButtonSavePref.Location = new System.Drawing.Point(123, 6);
+            this.ButtonSavePref.Location = new System.Drawing.Point(623, 575);
             this.ButtonSavePref.Name = "ButtonSavePref";
-            this.ButtonSavePref.Size = new System.Drawing.Size(356, 24);
+            this.ButtonSavePref.Size = new System.Drawing.Size(224, 24);
             this.ButtonSavePref.TabIndex = 6;
             this.ButtonSavePref.Text = "Save current preferences to project";
             this.ButtonSavePref.UseVisualStyleBackColor = true;
@@ -219,35 +227,57 @@ namespace ArduinoIDE_Launcher
             this.label4.TabIndex = 11;
             this.label4.Text = "Arduino IDE settings:";
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label3.Location = new System.Drawing.Point(582, 575);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(35, 25);
+            this.label3.TabIndex = 12;
+            this.label3.Text = "💾";
+            // 
+            // ButtonSaveCustom
+            // 
+            this.ButtonSaveCustom.Location = new System.Drawing.Point(853, 575);
+            this.ButtonSaveCustom.Name = "ButtonSaveCustom";
+            this.ButtonSaveCustom.Size = new System.Drawing.Size(160, 24);
+            this.ButtonSaveCustom.TabIndex = 6;
+            this.ButtonSaveCustom.Text = "Save new preferences";
+            this.ButtonSaveCustom.UseVisualStyleBackColor = true;
+            this.ButtonSaveCustom.Click += new System.EventHandler(this.ButtonSaveCustom_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1022, 609);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.CheckBoxOptionStartDefault);
             this.Controls.Add(this.button3);
-            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.ButtonImportIno);
             this.Controls.Add(this.ListViewSketches);
-            this.Controls.Add(this.listView2);
+            this.Controls.Add(this.ListViewPreferences);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.ButtonSavePref);
             this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.ButtonSaveCustom);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Arduino IDE Launcher - v1.1";
+            this.Text = "Arduino IDE Launcher";
             this.Load += new System.EventHandler(this.Form1_Load);
 
         }
 
         #endregion
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.ListView listView2;
+        private System.Windows.Forms.ListView ListViewPreferences;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ListView ListViewSketches;
@@ -263,6 +293,8 @@ namespace ArduinoIDE_Launcher
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button ButtonSaveCustom;
     }
 }
 

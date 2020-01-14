@@ -15,6 +15,7 @@ namespace ArduinoIDE_Launcher
         private Dictionary<string, Settings> SettingList;
         private readonly Arduino ArduinoIDE = new Arduino();
         private bool PreferencesFilled = false;
+        private bool checkFromDoubleClick = false;
 
         public Form1()
         {
@@ -36,6 +37,8 @@ namespace ArduinoIDE_Launcher
             progressBar1.Visible = true;
             progressBar1.Value = 10;
             PreferencesFilled = false;
+
+            Text += " - v" + Application.ProductVersion;
 
             if (Properties.Settings1.Default.ArduinoFolder.Length > 10)
                 button3.Text = Properties.Settings1.Default.ArduinoFolder;
@@ -104,7 +107,28 @@ namespace ArduinoIDE_Launcher
                     }
                 }
             }
-            
+
+
+            ListViewSketches.ContextMenuStrip = new ContextMenuStrip
+            {
+                Text = "Sketch options",
+            };
+            var itemOpen = ListViewSketches.ContextMenuStrip.Items.Add("&Open");
+            itemOpen.Click += (s, e) =>
+            {
+                ListViewSketches_DoubleClick(s, e);
+            };
+            var itemFolder = ListViewSketches.ContextMenuStrip.Items.Add("Open Sketch &Folder");
+            itemFolder.Click += (s, e) =>
+            {
+                if (ListViewSketches.SelectedItems.Count > 0)
+                {
+                    ArduinoIDE.OpenSketchFolder(ListViewSketches.SelectedItems[0].Tag.ToString());
+                }
+            };
+
+
+
             FillPreferences();
         }
 
@@ -184,26 +208,26 @@ namespace ArduinoIDE_Launcher
 
         private void FillPreferences()
         {
-            listView2.Items.Clear();
-            listView2.Groups.Clear();
-            Arduino.PreferencesApplicationGroups.ForEach(g => { listView2.Groups.Add(g, g); });
+            ListViewPreferences.Items.Clear();
+            ListViewPreferences.Groups.Clear();
+            Arduino.PreferencesApplicationGroups.ForEach(g => { ListViewPreferences.Groups.Add(g, g); });
 
             foreach (var s in SettingList.Values)
             {
-                if (s.Group != "" && listView2.Groups[s.Group] == null)
+                if (s.Group != "" && ListViewPreferences.Groups[s.Group] == null)
                 {
-                    listView2.Groups.Add(s.Group, s.Group);
+                    ListViewPreferences.Groups.Add(s.Group, s.Group);
                 }
 
                 var lvi = new ListViewItem(s.SubParameter);
                 lvi.SubItems.Add(s.Value);
                 lvi.SubItems.Add("");
 
-                lvi.Group = listView2.Groups[s.Group];
+                lvi.Group = ListViewPreferences.Groups[s.Group];
                 lvi.Name = s.Parameter;
                 lvi.Checked = s.CheckedDefault;
 
-                s.LVItem = listView2.Items.Add(lvi);
+                s.LVItem = ListViewPreferences.Items.Add(lvi);
             };
 
             PreferencesFilled = true;
@@ -302,25 +326,62 @@ namespace ArduinoIDE_Launcher
         {
             if (ListViewSketches.SelectedItems.Count > 0)
             {
-                var preference = "";
-                for (var j = 0; j < listView2.Items.Count; j++)
+                var newFileName = Path.Combine(ListViewSketches.SelectedItems[0].Tag.ToString(), "." + Arduino.PreferencesFileName);
+                if(File.Exists(newFileName))
                 {
-                    if (listView2.Items[j].Checked)
+                    if(MessageBox.Show("Do your really want overwrite your personalized preferences with this one?", "File already exists", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question) != DialogResult.Yes)
+                    {
+                        return;
+                    }
+                }
+                var preference = "";
+                for (var j = 0; j < ListViewPreferences.Items.Count; j++)
+                {
+                    if (ListViewPreferences.Items[j].Checked)
                     {
                         var p = "";
-                        if (listView2.Items[j].Group == null || Arduino.PreferencesApplicationGroups.Contains(listView2.Items[j].Group.Header))
+                        if (ListViewPreferences.Items[j].Group == null || Arduino.PreferencesApplicationGroups.Contains(ListViewPreferences.Items[j].Group.Header))
                         {
-                            p += listView2.Items[j].Text;
+                            p += ListViewPreferences.Items[j].Text;
                         }
                         else
                         {
-                            p += listView2.Items[j].Group.Name + listView2.Items[j].Text;
+                            p += ListViewPreferences.Items[j].Group.Name + "." + ListViewPreferences.Items[j].Text;
                         }
-                        p += "=" + listView2.Items[j].SubItems[1].Text + "\n";
+                        p += "=" + ListViewPreferences.Items[j].SubItems[1].Text + "\n";
                         preference += p;
                     }
                 }
-                File.WriteAllText(Path.Combine(ListViewSketches.SelectedItems[0].Tag.ToString(), "." + Arduino.PreferencesFileName), preference);
+                File.WriteAllText(newFileName, preference);
+                UpdateIcon(ListViewSketches.SelectedItems[0]);
+                ListViewSketches.SelectedItems.Clear();
+            }
+        }
+
+        private void ButtonSaveCustom_Click(object sender, EventArgs e)
+        {
+            if (ListViewSketches.SelectedItems.Count > 0)
+            {
+                var newFileName = Path.Combine(ListViewSketches.SelectedItems[0].Tag.ToString(), "." + Arduino.PreferencesFileName);
+                var preference = "";
+                for (var j = 0; j < ListViewPreferences.Items.Count; j++)
+                {
+                    if (ListViewPreferences.Items[j].Checked)
+                    {
+                        var p = "";
+                        if (ListViewPreferences.Items[j].Group == null || Arduino.PreferencesApplicationGroups.Contains(ListViewPreferences.Items[j].Group.Header))
+                        {
+                            p += ListViewPreferences.Items[j].Text;
+                        }
+                        else
+                        {
+                            p += ListViewPreferences.Items[j].Group.Name + "." + ListViewPreferences.Items[j].Text;
+                        }
+                        p += "=" + ListViewPreferences.Items[j].SubItems[2].Text + "\n";
+                        preference += p;
+                    }
+                }
+                File.WriteAllText(newFileName, preference);
                 UpdateIcon(ListViewSketches.SelectedItems[0]);
                 ListViewSketches.SelectedItems.Clear();
             }
@@ -342,9 +403,14 @@ namespace ArduinoIDE_Launcher
                     if(SettingList.ContainsKey(p.Key))
                     {
                         if (SettingList[p.Key].LVItem.SubItems[1].Text == p.Value)
+                        {
                             SettingList[p.Key].LVItem.BackColor = Arduino.PreferencesColor.Intendical;
+                        }
                         else
+                        {
                             SettingList[p.Key].LVItem.BackColor = Arduino.PreferencesColor.DifferentFile;
+                            SettingList[p.Key].LVItem.Checked = true;
+                        }
                         SettingList[p.Key].LVItem.SubItems[2].Text = p.Value;
                     }
                 }
@@ -354,18 +420,25 @@ namespace ArduinoIDE_Launcher
                     if (SettingList.ContainsKey(p.Key))
                     {
                         if (SettingList[p.Key].LVItem.SubItems[1].Text == p.Value)
+                        {
                             SettingList[p.Key].LVItem.BackColor = Arduino.PreferencesColor.Intendical;
+                        }
                         else
+                        {
                             SettingList[p.Key].LVItem.BackColor = Arduino.PreferencesColor.DifferentIno;
+                            SettingList[p.Key].LVItem.Checked = true;
+                        }
                         SettingList[p.Key].LVItem.SubItems[2].Text = p.Value;
                     }
                 }
 
                 ButtonSavePref.Enabled = true;
+                ButtonSaveCustom.Enabled = false;
             }
             else
             {
                 ButtonSavePref.Enabled = false;
+                ButtonSaveCustom.Enabled = false;
             }
         }
 
@@ -426,5 +499,51 @@ namespace ArduinoIDE_Launcher
             }
         }
 
+        private void ListViewPreferences_DoubleClick(object sender, EventArgs e)
+        {
+            if (ListViewPreferences.SelectedItems.Count > 0)
+            {
+                var lvi = ListViewPreferences.SelectedItems[0];
+
+                var param = SettingList.FirstOrDefault(x => x.Value.LVItem == lvi);
+
+                if (param.Value != null)
+                {
+                    using var f2 = new FormPreference(param.Key, param.Value.Value, lvi.SubItems[2].Text);
+                    if (f2.ShowDialog() == DialogResult.OK)
+                    {
+                        param.Value.LVItem.SubItems[2].Text = f2.NewValue;
+                        ButtonSaveCustom.Enabled = true;
+                        param.Value.LVItem.Checked = true;
+                    }
+                }
+            }
+        }
+
+        private void ListViewPreferences_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if(checkFromDoubleClick)
+            {
+                e.NewValue = e.CurrentValue;
+                checkFromDoubleClick = false;
+            }
+            else if(ListViewSketches.SelectedItems.Count > 0)
+            {
+                ButtonSaveCustom.Enabled = true;
+            }
+        }
+
+        private void ListViewPreferences_MouseDown(object sender, MouseEventArgs e)
+        {
+            if(e.Clicks > 1)
+            {
+                checkFromDoubleClick = true;
+            }
+        }
+
+        private void ListViewPreferences_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

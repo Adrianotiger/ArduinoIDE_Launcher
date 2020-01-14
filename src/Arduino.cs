@@ -215,7 +215,16 @@ namespace ArduinoIDE_Launcher
                             p += sl.Parameter;
 
                             if (sl.LVItem.Checked)
-                                p += "=" + sl.LVItem.SubItems[2].Text + "\r\n";
+                            {
+                                if (sl.Parameter == "sketchbook.path" && sl.LVItem.SubItems[2].Text.StartsWith(".."))
+                                {
+                                    p += "=" + Path.Combine(projectPath, sl.LVItem.SubItems[2].Text) + "\r\n";
+                                }
+                                else
+                                {
+                                    p += "=" + sl.LVItem.SubItems[2].Text + "\r\n";
+                                }
+                            }
                             else
                                 p += "=" + sl.LVItem.SubItems[1].Text + "\r\n";
                             preference += p;
@@ -241,6 +250,17 @@ namespace ArduinoIDE_Launcher
             }
 
             return successfull;
+        }
+
+        public void OpenSketchFolder(string sketchPath)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                Arguments = sketchPath,
+                FileName = "explorer.exe"
+            };
+
+            Process.Start(startInfo);
         }
     }
 }
