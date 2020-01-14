@@ -1,4 +1,5 @@
-#Arduino IDE Launcher
+# Arduino IDE Launcher  
+ 
  This tool will launch the Arduino IDE with your custom board.
  
  Tired to change manually the board every time you launch your Arduino IDE?
