@@ -27,10 +27,14 @@
 ### Method 2  
 - Open your sketch in the Arduino IDE
 - Write your custom paramenter in your main `*.ino` file with this format: 
-```
-**#ide_param:board=328
-```
 - `**#ide_param:PARAM_NAME=PARAM_VALUE`
+- Example:
+```
+/* Arduino IDE Parameters:
+**#ide_param:board=328
+*/
+```
+
 
 ## How Arduino IDE is started
 If your sketch has some custom preferences, you will see a yellow (preferences.txt) or green (preferences inside your sketch) icon.
