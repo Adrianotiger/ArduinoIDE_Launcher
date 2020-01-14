@@ -5,7 +5,7 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject>ArduinoIDE_Launcher.Program</StartupObject>
-    <ApplicationIcon>icon_newparam.ico</ApplicationIcon>
+    <ApplicationIcon>src\images\icon_newparam.ico</ApplicationIcon>
     <Authors>Adriano</Authors>
     <Company>-</Company>
     <Description>Launch Arduino with Project settings</Description>
@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="images\" />
+    <Folder Include="src\images\" />
   </ItemGroup>
 
   <ItemGroup>
