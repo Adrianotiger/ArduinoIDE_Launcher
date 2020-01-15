@@ -6,6 +6,11 @@
  
  Now, you can set your preferences directly in your sketch or save the current preferences in your sketch folder.
  
+ ## Start application
+ It is a .net core 3 application. You need the runtimes to start it (Windows, Linux or MacOS). You can download it directly from the Microsoft page:
+ https://dotnet.microsoft.com/download/dotnet-core/3.0
+ - If you want compile this project, you need to download the SDK for Visual Studio.
+ 
  ## Application interface
  The Preferences text file is detected automatically. The location of your Arduino.exe file must be set by you, before you can use the application.
  ![Screenshot](images/Application_Screenshot.jpg)
