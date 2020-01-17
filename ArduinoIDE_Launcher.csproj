@@ -9,8 +9,42 @@
     <Authors>Adriano</Authors>
     <Company>-</Company>
     <Description>Launch Arduino with Project settings</Description>
-    <Version>1.2</Version>
+    <Version>1.3.0</Version>
+    <PackageProjectUrl>https://github.com/Adrianotiger/ArduinoIDE_Launcher</PackageProjectUrl>
+    <PackageIcon>icon_newparam.png</PackageIcon>
+    <PackageIconUrl />
+    <RepositoryUrl>https://github.com/Adrianotiger/ArduinoIDE_Launcher</RepositoryUrl>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\netcore3\Debug\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>bin\netcore3\Release\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="images\**" />
+    <Compile Remove="netFramework\**" />
+    <EmbeddedResource Remove="images\**" />
+    <EmbeddedResource Remove="netFramework\**" />
+    <None Remove="images\**" />
+    <None Remove="netFramework\**" />
+    <None Include="src\images\icon_newparam.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="icon_newparam.ico" />
+    <None Remove="Properties\App.config" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="src\images\" />

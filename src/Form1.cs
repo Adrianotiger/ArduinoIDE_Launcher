@@ -94,7 +94,6 @@ namespace ArduinoIDE_Launcher
                 ColorDepth = ColorDepth.Depth32Bit,
                 ImageSize = new Size(16, 16)
             };
-
             var resourceSet = Properties.Resources.ResourceManager.GetResourceSet(CultureInfo.InvariantCulture, true, false);
             if (resourceSet != null)
             {
@@ -279,47 +278,47 @@ namespace ArduinoIDE_Launcher
 
         private void ButtonFindArduino_Click(object sender, EventArgs e)
         {
-            using var fo = new OpenFileDialog
+            using (var fo = new OpenFileDialog
             {
                 Filter = "?rduino.exe|Arduino",
                 FileName = "*rduino.exe",
                 InitialDirectory = button3.Text,
                 CheckFileExists = true
-            };
-            if (fo.ShowDialog() == DialogResult.OK)
-            {
-                button3.Text = fo.FileName;
-                Properties.Settings1.Default.ArduinoFolder = fo.FileName;
-                Properties.Settings1.Default.Save();
-            }
+            })
+                if (fo.ShowDialog() == DialogResult.OK)
+                {
+                    button3.Text = fo.FileName;
+                    Properties.Settings1.Default.ArduinoFolder = fo.FileName;
+                    Properties.Settings1.Default.Save();
+                }
         }
 
         private void ButtonImportIno_Click(object sender, EventArgs e)
         {
-            using var fd = new OpenFileDialog
+            using (var fd = new OpenFileDialog
             {
                 Filter = "*.ino|ino project",
                 Title = "Open Arduino Project",
                 CheckFileExists = true,
                 FileName = "*.ino",
                 Multiselect = false
-            };
-            if (fd.ShowDialog() == DialogResult.OK)
-            {
-                var fn = Path.GetFileName(fd.FileName);
-
-                var lvi = new ListViewItem(fn)
+            })
+                if (fd.ShowDialog() == DialogResult.OK)
                 {
-                    Tag = Path.GetDirectoryName(fd.FileName),
-                    Group = ListViewSketches.Groups["Recent"],
-                    ImageKey = "icon_loading"
-                };
-                ListViewSketches.Items.Add(lvi);
+                    var fn = Path.GetFileName(fd.FileName);
 
-                AddRecent(fd.FileName);
+                    var lvi = new ListViewItem(fn)
+                    {
+                        Tag = Path.GetDirectoryName(fd.FileName),
+                        Group = ListViewSketches.Groups["Recent"],
+                        ImageKey = "icon_loading"
+                    };
+                    ListViewSketches.Items.Add(lvi);
 
-                UpdateIcon(lvi);
-            }
+                    AddRecent(fd.FileName);
+
+                    UpdateIcon(lvi);
+                }
         }
 
         private void ButtonSavePref_Click(object sender, EventArgs e)
@@ -509,13 +508,13 @@ namespace ArduinoIDE_Launcher
 
                 if (param.Value != null)
                 {
-                    using var f2 = new FormPreference(param.Key, param.Value.Value, lvi.SubItems[2].Text);
-                    if (f2.ShowDialog() == DialogResult.OK)
-                    {
-                        param.Value.LVItem.SubItems[2].Text = f2.NewValue;
-                        ButtonSaveCustom.Enabled = true;
-                        param.Value.LVItem.Checked = true;
-                    }
+                    using (var f2 = new FormPreference(param.Key, param.Value.Value, lvi.SubItems[2].Text))
+                        if (f2.ShowDialog() == DialogResult.OK)
+                        {
+                            param.Value.LVItem.SubItems[2].Text = f2.NewValue;
+                            ButtonSaveCustom.Enabled = true;
+                            param.Value.LVItem.Checked = true;
+                        }
                 }
             }
         }
@@ -544,6 +543,12 @@ namespace ArduinoIDE_Launcher
         private void ListViewPreferences_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            var info = new FormInfo();
+            info.ShowDialog();
         }
     }
 }

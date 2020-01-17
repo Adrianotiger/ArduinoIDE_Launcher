@@ -131,11 +131,19 @@ namespace ArduinoIDE_Launcher
         {
             if (callback != null)
             {
-                Watcher.Path = PreferencesFilePath;
-                Watcher.Filter = PreferencesFileName;
-                Watcher.NotifyFilter = NotifyFilters.LastWrite;
-                Watcher.Changed += Watcher_Changed; ;
-                WatcherCallback = callback;
+                var path = Path.GetDirectoryName(GetPreferencesDefaultFullPath());
+                try
+                {
+                    Watcher.Path = path;
+                    Watcher.Filter = PreferencesFileName;
+                    Watcher.NotifyFilter = NotifyFilters.LastWrite;
+                    Watcher.Changed += Watcher_Changed; ;
+                    WatcherCallback = callback;
+                }
+                catch(Exception ex)
+                {
+                    Program.ErrorLog.Add("[E|StartPreferencesWatcher]" + ex.Message);
+                }
             }
             Watcher.EnableRaisingEvents = true;
         }
@@ -161,7 +169,8 @@ namespace ArduinoIDE_Launcher
                     {
                         if(s.Contains("="))
                         {
-                            var pair = s.Split('=', 2);
+                            char[] splits = { '=' };
+                            var pair = s.Split(splits, 2);
                             ret.Add(pair[0], pair[1]);
                         }
                     });
@@ -179,7 +188,8 @@ namespace ArduinoIDE_Launcher
                 {
                     if (s.Contains(IDE_PARAM_KEY) && s.Contains("=") && s.IndexOf("=") > s.IndexOf(IDE_PARAM_KEY))
                     {
-                        var pair = s.Substring(s.IndexOf(IDE_PARAM_KEY) + IDE_PARAM_KEY.Length).Split("=");
+                        char[] splits = { '=' };
+                        var pair = s.Substring(s.IndexOf(IDE_PARAM_KEY) + IDE_PARAM_KEY.Length).Split(splits);
                         ret.Add(pair[0], pair[1]);
                     }
                 });
@@ -202,7 +212,7 @@ namespace ArduinoIDE_Launcher
                         pr.StartInfo = new ProcessStartInfo
                         {
                             FileName = Properties.Settings1.Default.ArduinoFolder,
-                            Arguments = " " + Path.Combine(Properties.Settings1.Default.ArduinoFolder, project) + ""
+                            Arguments = " " + Path.Combine(projectPath, project) + ""
                         };
                     }
                     else
