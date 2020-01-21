@@ -44,9 +44,9 @@ namespace ArduinoIDE_Launcher
             return Path.Combine(path, PreferencesFileName);
         }
 
-        public Dictionary<string, Settings> LoadPreferences()
+        public Dictionary<string, IDEPreferences> LoadPreferences()
         {
-            Dictionary<string, Settings> settings = new Dictionary<string, Settings>(StringComparer.InvariantCulture);
+            Dictionary<string, IDEPreferences> settings = new Dictionary<string, IDEPreferences>(StringComparer.InvariantCulture);
 
             if(!File.Exists(GetPreferencesDefaultFullPath()))
             {
@@ -63,7 +63,7 @@ namespace ArduinoIDE_Launcher
                     {
                         var param = lines[j].Substring(0, lines[j].IndexOf("="));
                         var paramValue = lines[j].Substring(lines[j].IndexOf("=") + 1);
-                        settings.Add(param, new Settings
+                        settings.Add(param, new IDEPreferences
                         {
                             Value = paramValue,
                             Parameter = param
@@ -92,21 +92,7 @@ namespace ArduinoIDE_Launcher
                 return itemsList;
             }
 
-            for (var j = 0; j < Properties.Settings1.Default.RecentNum; j++)
-            {
-                var full = Properties.Settings1.Default["Recent" + j.ToString("D2")].ToString();
-                var dir = Path.GetFileName(Path.GetDirectoryName(full));
-                if (File.Exists(full))
-                {
-                    var lvi = new ListViewItem(dir)
-                    {
-                        Tag = Path.GetDirectoryName(full),
-                        Group = new ListViewGroup("Recent"),// listView1.Groups["Recent"];
-                        ImageKey = "icon_loading"
-                    };
-                    itemsList.Add(lvi);
-                }
-            }
+            itemsList.AddRange(Settings.GetRecentSketches());
 
             var dirs = Directory.GetDirectories(path, "*", SearchOption.TopDirectoryOnly);
             for (var j = 0; j < dirs.Length; j++)
@@ -197,7 +183,7 @@ namespace ArduinoIDE_Launcher
             return ret;
         }
 
-        public bool LaunchArduinoIDE(Dictionary<string, string> customPreferences, Dictionary<string, Settings> settingsList, string projectPath)
+        public bool LaunchArduinoIDE(Dictionary<string, string> customPreferences, Dictionary<string, IDEPreferences> settingsList, string projectPath)
         {
             bool successfull = true;
             using (Process pr = new Process())
@@ -206,13 +192,14 @@ namespace ArduinoIDE_Launcher
                 {
 
                     var project = Path.GetFileName(projectPath) + ".ino";
+                    var projectArg = "\"" + Path.Combine(projectPath, project) + "\"";
 
                     if (customPreferences.Count == 0)
                     {
                         pr.StartInfo = new ProcessStartInfo
                         {
-                            FileName = Properties.Settings1.Default.ArduinoFolder,
-                            Arguments = " " + Path.Combine(projectPath, project) + ""
+                            FileName = Settings.GetArduinoFolder(),
+                            Arguments = " " + projectArg + ""
                         };
                     }
                     else
@@ -245,8 +232,8 @@ namespace ArduinoIDE_Launcher
 
                         pr.StartInfo = new ProcessStartInfo
                         {
-                            FileName = Properties.Settings1.Default.ArduinoFolder,
-                            Arguments = " --preferences-file " + tempFile + " " + Path.Combine(projectPath, project) + ""
+                            FileName = Settings.GetArduinoFolder(),
+                            Arguments = " --preferences-file " + tempFile + " " + projectArg + ""
                         };
                     }
 

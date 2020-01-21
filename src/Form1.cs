@@ -12,7 +12,7 @@ namespace ArduinoIDE_Launcher
 {
     public partial class Form1 : Form
     {
-        private Dictionary<string, Settings> SettingList;
+        private Dictionary<string, IDEPreferences> SettingList;
         private readonly Arduino ArduinoIDE = new Arduino();
         private bool PreferencesFilled = false;
         private bool checkFromDoubleClick = false;
@@ -40,8 +40,12 @@ namespace ArduinoIDE_Launcher
 
             Text += " - v" + Application.ProductVersion;
 
-            if (Properties.Settings1.Default.ArduinoFolder.Length > 10)
-                button3.Text = Properties.Settings1.Default.ArduinoFolder;
+            Settings.Init();
+
+            
+
+            if (Settings.GetArduinoFolder() != null)
+                button3.Text = Settings.GetArduinoFolder();
 
             Task.Run(async () =>
             {
@@ -243,82 +247,51 @@ namespace ArduinoIDE_Launcher
                 sl.LVItem.SubItems[2].Text = "";
             };
         }
-
-        private void AddRecent(string recent)
-        {
-            var found = false;
-            for (var j = 0; j < Properties.Settings1.Default.RecentNum; j++)
-            {
-                if (recent == Properties.Settings1.Default["Recent" + j.ToString("D2")].ToString())
-                {
-                    if (j > 0)
-                    {
-                        for (var k = j; k > 0; k--)
-                        {
-                            Properties.Settings1.Default["Recent" + k.ToString("D2")] = Properties.Settings1.Default["Recent" + (k-1).ToString("D2")];
-                        }
-                        Properties.Settings1.Default["Recent00"] = recent;
-                    }
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                for (var k = Properties.Settings1.Default.RecentNum - 1; k > 0; k--)
-                {
-                    Properties.Settings1.Default["Recent" + k.ToString("D2")] = Properties.Settings1.Default["Recent" + (k - 1).ToString("D2")];
-                }
-                Properties.Settings1.Default["Recent00"] = recent;
-                if (Properties.Settings1.Default.RecentNum < 16) Properties.Settings1.Default.RecentNum++;
-            }
-            Properties.Settings1.Default.Save();
-        }
-
+        
 
         private void ButtonFindArduino_Click(object sender, EventArgs e)
         {
-            using (var fo = new OpenFileDialog
+            using var fo = new OpenFileDialog
             {
                 Filter = "?rduino.exe|Arduino",
                 FileName = "*rduino.exe",
+                Title = "Find Arduino Location",
                 InitialDirectory = button3.Text,
                 CheckFileExists = true
-            })
-                if (fo.ShowDialog() == DialogResult.OK)
-                {
-                    button3.Text = fo.FileName;
-                    Properties.Settings1.Default.ArduinoFolder = fo.FileName;
-                    Properties.Settings1.Default.Save();
-                }
+            };
+            if (fo.ShowDialog() == DialogResult.OK)
+            {
+                button3.Text = fo.FileName;
+                Settings.SetArduinoFolder(fo.FileName);
+            }
         }
 
         private void ButtonImportIno_Click(object sender, EventArgs e)
         {
-            using (var fd = new OpenFileDialog
+            using var fd = new OpenFileDialog
             {
                 Filter = "*.ino|ino project",
                 Title = "Open Arduino Project",
                 CheckFileExists = true,
                 FileName = "*.ino",
                 Multiselect = false
-            })
-                if (fd.ShowDialog() == DialogResult.OK)
+            };
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                var fn = Path.GetFileName(fd.FileName);
+
+                var lvi = new ListViewItem(fn)
                 {
-                    var fn = Path.GetFileName(fd.FileName);
+                    Tag = Path.GetDirectoryName(fd.FileName),
+                    Group = ListViewSketches.Groups["Recent"],
+                    ImageKey = "icon_loading"
+                };
+                ListViewSketches.Items.Add(lvi);
 
-                    var lvi = new ListViewItem(fn)
-                    {
-                        Tag = Path.GetDirectoryName(fd.FileName),
-                        Group = ListViewSketches.Groups["Recent"],
-                        ImageKey = "icon_loading"
-                    };
-                    ListViewSketches.Items.Add(lvi);
+                Settings.AddToRecent(fd.FileName);
 
-                    AddRecent(fd.FileName);
-
-                    UpdateIcon(lvi);
-                }
+                UpdateIcon(lvi);
+            }
         }
 
         private void ButtonSavePref_Click(object sender, EventArgs e)
@@ -468,7 +441,7 @@ namespace ArduinoIDE_Launcher
 
                 if (success)
                 {
-                    AddRecent(pathIno);
+                    Settings.AddToRecent(pathIno);
                     bool found = false;
 
                     for (var j = 0; j < ListViewSketches.Groups["Recent"].Items.Count; j++)
@@ -508,13 +481,13 @@ namespace ArduinoIDE_Launcher
 
                 if (param.Value != null)
                 {
-                    using (var f2 = new FormPreference(param.Key, param.Value.Value, lvi.SubItems[2].Text))
-                        if (f2.ShowDialog() == DialogResult.OK)
-                        {
-                            param.Value.LVItem.SubItems[2].Text = f2.NewValue;
-                            ButtonSaveCustom.Enabled = true;
-                            param.Value.LVItem.Checked = true;
-                        }
+                    using var f2 = new FormPreference(param.Key, param.Value.Value, lvi.SubItems[2].Text);
+                    if (f2.ShowDialog() == DialogResult.OK)
+                    {
+                        param.Value.LVItem.SubItems[2].Text = f2.NewValue;
+                        ButtonSaveCustom.Enabled = true;
+                        param.Value.LVItem.Checked = true;
+                    }
                 }
             }
         }

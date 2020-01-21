@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
@@ -7,56 +8,99 @@ namespace ArduinoIDE_Launcher
 {
     class Settings
     {
-        private readonly List<string> CheckStandard = new List<string> { "board", "programmer", "software", "target_package", "target_platform" };
-        private readonly List<string> CheckGroups = new List<string> { "CUSTOM" };
-        private readonly List<string> IgnoredParams = new List<string> { "last.", "recent.sketches" };
-
-        private String _param = "";
-        public ListViewItem LVItem { get; set; } = null;
-        public String Value { get; set; } = "";
-            
-        public String Group { get; private set; } = "";
-        public String Parameter
+        public static void Init()
         {
-            get
+            if (!Properties.Settings1.Default.SettingsUpdated)
             {
-                return _param;
-            }
-            set
-            {
-                if (value.StartsWith("custom_")) Group = "CUSTOM";
-                else if (value.Contains(".")) Group = value.Substring(0, value.IndexOf("."));
-                _param = value;
+                Properties.Settings1.Default.Upgrade();
+                Properties.Settings1.Default.SettingsUpdated = true;
+                Properties.Settings1.Default.Save();
             }
         }
 
-        public String SubParameter
+        public static string GetArduinoFolder()
         {
-            get
-            {
-                if (Parameter.Contains(".")) return Parameter.Substring(Parameter.IndexOf(".") + 1);
-                else return Parameter;
-            }
+            if (Properties.Settings1.Default.ArduinoFolder.Length > 10)
+                return Properties.Settings1.Default.ArduinoFolder;
+            else
+                return null;
         }
 
-        public bool CheckedDefault { get
-            {
-                if (Group != "") return (CheckGroups.Contains(Group));
-                else return CheckStandard.Contains(Parameter);
-            } 
+        public static void SetArduinoFolder(string path)
+        {
+            Properties.Settings1.Default.ArduinoFolder = path;
+            Properties.Settings1.Default.Save();
         }
 
-        public bool IsIgnoring
+        public static void AddToRecent(string recent)
         {
-            get
+            var found = false;
+            for (var j = 0; j < Properties.Settings1.Default.RecentNum; j++)
             {
-                for(var j=0;j<IgnoredParams.Count;j++)
+                if (recent == Properties.Settings1.Default["Recent" + j.ToString("D2")].ToString())
                 {
-                    if (Parameter.StartsWith(IgnoredParams[j])) return true;
+                    if (j > 0)
+                    {
+                        for (var k = j; k > 0; k--)
+                        {
+                            Properties.Settings1.Default["Recent" + k.ToString("D2")] = Properties.Settings1.Default["Recent" + (k - 1).ToString("D2")];
+                        }
+                        Properties.Settings1.Default["Recent00"] = recent;
+                    }
+                    found = true;
+                    break;
                 }
-                return false;
             }
+            if (!found)
+            {
+                for (var k = Properties.Settings1.Default.RecentNum; k > 0; k--)
+                {
+                    Properties.Settings1.Default["Recent" + k.ToString("D2")] = Properties.Settings1.Default["Recent" + (k - 1).ToString("D2")];
+                }
+                Properties.Settings1.Default["Recent00"] = recent;
+                if (Properties.Settings1.Default.RecentNum < 16) Properties.Settings1.Default.RecentNum++;
+            }
+            Properties.Settings1.Default.Save();
         }
 
+        public static List<ListViewItem> GetRecentSketches()
+        {
+            List<int> removeSketches = new List<int>();
+            List<ListViewItem> itemsList = new List<ListViewItem>();
+            var recentCount = Properties.Settings1.Default.RecentNum;
+            for (var j = 0; j < recentCount; j++)
+            {
+                var full = Properties.Settings1.Default["Recent" + j.ToString("D2")].ToString();
+                var dir = Path.GetFileName(Path.GetDirectoryName(full));
+                if (File.Exists(full))
+                {
+                    var lvi = new ListViewItem(dir)
+                    {
+                        Tag = Path.GetDirectoryName(full),
+                        Group = new ListViewGroup("Recent"),// listView1.Groups["Recent"];
+                        ImageKey = "icon_loading"
+                    };
+                    itemsList.Add(lvi);
+                }
+                else
+                {
+                    removeSketches.Add(j);
+                }
+            }
+            removeSketches.Reverse();
+            removeSketches.ForEach(i => RemoveRecentSketch(i));
+            return itemsList;
+        }
+
+        public static void RemoveRecentSketch(int index)
+        {
+            var recentCount = Properties.Settings1.Default.RecentNum - 1;
+            for (var j = index; j < recentCount; j++)
+            {
+                Properties.Settings1.Default["Recent" + j.ToString("D2")] = Properties.Settings1.Default["Recent" + (j+1).ToString("D2")].ToString();
+            }
+            Properties.Settings1.Default.RecentNum = recentCount;
+            Properties.Settings1.Default.Save();
+        }
     }
 }

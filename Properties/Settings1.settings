@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ArduinoIDE_Settings.Properties" GeneratedClassName="Settings1">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ArduinoIDE_Launcher.Properties" GeneratedClassName="Settings1">
   <Profiles />
   <Settings>
     <Setting Name="Recent01" Type="System.String" Scope="User">
@@ -61,6 +61,9 @@
     </Setting>
     <Setting Name="ArduinoFolder" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="SettingsUpdated" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

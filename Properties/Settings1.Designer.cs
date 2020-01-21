@@ -262,5 +262,17 @@ namespace ArduinoIDE_Launcher.Properties {
                 this["ArduinoFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SettingsUpdated {
+            get {
+                return ((bool)(this["SettingsUpdated"]));
+            }
+            set {
+                this["SettingsUpdated"] = value;
+            }
+        }
     }
 }
