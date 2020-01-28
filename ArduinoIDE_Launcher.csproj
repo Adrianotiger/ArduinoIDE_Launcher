@@ -9,7 +9,7 @@
     <Authors>Adriano</Authors>
     <Company>-</Company>
     <Description>Launch Arduino with Project settings</Description>
-    <Version>1.4.0</Version>
+    <Version>1.4.1</Version>
     <PackageProjectUrl>https://github.com/Adrianotiger/ArduinoIDE_Launcher</PackageProjectUrl>
     <PackageIcon>icon_newparam.png</PackageIcon>
     <PackageIconUrl />

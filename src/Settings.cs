@@ -18,12 +18,32 @@ namespace ArduinoIDE_Launcher
             }
         }
 
+        private static string FindArduinoFolderFromRegistry()
+        {
+            string arduinoIDEPath = null;
+            var obj = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(".ino");
+            if (obj != null && obj.GetValue("") != null)
+            {
+                var key = obj.GetValue("").ToString();
+                var obj2 = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(key);
+                var cmd = obj2.OpenSubKey("shell\\open\\command");
+                if (cmd != null && cmd.GetValue("") != null)
+                {
+                    var path = cmd.GetValue("").ToString();
+                    path = path.Trim('"');
+                    path = path.Substring(0, path.IndexOf('"'));
+                    arduinoIDEPath = path;
+                }
+            }
+            return arduinoIDEPath;
+        }
+
         public static string GetArduinoFolder()
         {
             if (Properties.Settings1.Default.ArduinoFolder.Length > 10)
                 return Properties.Settings1.Default.ArduinoFolder;
             else
-                return null;
+                return FindArduinoFolderFromRegistry();
         }
 
         public static void SetArduinoFolder(string path)

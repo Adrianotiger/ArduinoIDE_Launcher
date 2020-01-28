@@ -30,7 +30,7 @@ namespace ArduinoIDE_Launcher
 
         public Arduino()
         {
-
+            
         }
 
         public string GetPreferencesDefaultFullPath()
